@@ -23,10 +23,10 @@ int main(void) {
 	WORD **H = initMat(352, 288, piFile);
 	// H = initMat(352, 288, piFile);
 
-	printf("h01 = %d\n", H[0][0]);
+	printf("h00 = %d\n", H[0][0]);
 	printf("h01 = %d\n", H[0][1]);
-	printf("h01 = %d\n", H[0][2]);
-	printf("h01 = %d\n", H[0][3]);
+	printf("h02 = %d\n", H[0][2]);
+	printf("h03 = %d\n", H[0][3]);
 
 
 	fclose(piFile);
@@ -52,17 +52,10 @@ int main(void) {
 WORD** initMat(int width,int height, FILE *piFile){
 	width = width/2;
 	WORD **MatResult = (WORD **)malloc(height);
-	int i, j;
+	int i;
 	for (i = 0; i < height; i++){
 		MatResult[i] = (WORD *)malloc(width);	//MatResult[i]存的是指针
 		fread(MatResult[i], sizeof(WORD), width, piFile);
-	}
-	// WORD temp;
-	for (i = 0; i < height; i++){
- 		for (j = 0; j < width; j++){
-			// fread(&temp, sizeof(WORD), 1, piFile);
-			printf("%d\t",MatResult[i][j]);
-		}
 	}
 	return MatResult;
 }
