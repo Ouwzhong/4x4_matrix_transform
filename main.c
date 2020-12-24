@@ -2,8 +2,8 @@
  * main.c
  */
 #include <stdio.h>
-// #define width 352
-// #define height 288
+// #define width 100
+// #define height 100
 
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
@@ -20,10 +20,8 @@ int main(void) {
 	FILE* piFile = fopen(iFileName, "rb");	//pointer input file
 	FILE* poFile = fopen(oFileName, "wb");	//pointer output file
 
-	WORD **H = initMat(352, 288, piFile);
-	// H = initMat(352, 288, piFile);
-
-	printf("h00 = %d\n", H[0][0]);
+	WORD **H = initMat(288, 352, piFile);
+	printf("h00 = %d\n", H[287][175]);
 	printf("h01 = %d\n", H[0][1]);
 	printf("h02 = %d\n", H[0][2]);
 	printf("h03 = %d\n", H[0][3]);
@@ -49,13 +47,19 @@ int main(void) {
 // 	return MatResult;
 // }
 
-WORD** initMat(int width,int height, FILE *piFile){
+WORD** initMat(int height,int width, FILE *piFile){
 	width = width/2;
-	WORD **MatResult = (WORD **)malloc(height);
+	WORD **MatResult = (WORD **)calloc(height,sizeof(WORD*));
 	int i;
 	for (i = 0; i < height; i++){
-		MatResult[i] = (WORD *)malloc(width);	//MatResult[i]存的是指针
-		fread(MatResult[i], sizeof(WORD), width, piFile);
+		WORD *new_addr = (WORD *)calloc(width,sizeof(WORD));	
+		if (new_addr){
+		MatResult[i] = new_addr;
+		fread(new_addr, sizeof(WORD), width, piFile);
+		}
+		else{
+			printf("Out of memory!")
+		}
 	}
 	return MatResult;
 }

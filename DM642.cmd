@@ -15,7 +15,7 @@
 
 MEMORY
 {
-    IRAM:          o = 0x00000000  l = 0x00040000  /* 256kB Internal RAM (L2) */
+    IRAM:          o = 0x00000000  l = 0x08000000  /* 5MB Internal RAM (L2) */
     EMIFA_CS0:     o = 0x80000000  l = 0x10000000  /* 256MB EMIFA CE0 */
     EMIFA_CS1:     o = 0x90000000  l = 0x10000000  /* 256MB EMIFA CE1 */
     EMIFA_CS2:     o = 0xA0000000  l = 0x10000000  /* 256MB EMIFA CE2 */
