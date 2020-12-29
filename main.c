@@ -3,7 +3,7 @@
  */
 #include <stdio.h>
 
-typedef unsigned char BYTE;
+typedef signed char BYTE;
 typedef unsigned short WORD;
 
 const char iFileName[] = "data.yuv"; 
@@ -14,6 +14,7 @@ BYTE** H_transform(int height, int width, BYTE** X);
 BYTE** H_dotp(BYTE** N);
 BYTE** H_dotp_inv(BYTE** N);
 void saveMat(int height, int width, BYTE** Y, FILE *poFile);
+void show_mat(int height, int width, BYTE** Mat);
 
 int main(void) {
 
@@ -27,12 +28,7 @@ int main(void) {
 
 	for  (i = 0; i<height/4; i++){
 	BYTE **X = initMat(4, width, piFile);
-	// BYTE temp = H[0][0];
-	// printf("h00 = %d\n", H[287][351]);
-	// printf("h01 = %d\n", H[0][1]);
-	// printf("h02 = %d\n", H[0][2]);
-	// printf("h03 = %d\n", H[0][3]);
-
+	// show_mat(4, width, X);
 	BYTE **Y = H_transform(4, width, X);
 	saveMat(4, width, Y, poFile);
 	}
@@ -42,23 +38,6 @@ int main(void) {
     fclose(poFile);
 	return 0;
 }
-
-// WORD** initMat(int height,int width, FILE *piFile){
-// 	// width = width/2;
-// 	WORD **MatResult = (WORD **)calloc(height,sizeof(WORD*));
-// 	int i;
-// 	for (i = 0; i < height; i++){
-// 		WORD *new_addr = (WORD *)calloc(width,sizeof(WORD));	
-// 		if (new_addr){
-// 		MatResult[i] = new_addr;
-// 		fread(new_addr, sizeof(WORD), width, piFile);
-// 		}
-// 		else{
-// 			printf("Out of memory!");
-// 		}
-// 	}
-// 	return MatResult;
-// }
 
 BYTE** initMat(int height,int width, FILE *piFile){
 	// width = width/2;
@@ -88,17 +67,15 @@ void saveMat(int height, int width, BYTE** Y, FILE *poFile){
 BYTE** H_transform(int height, int width, BYTE** X){
 	int y, ymax = height / 4;
 	int x, xmax = width / 4;
-	//BYTE H[4][4] = {{1,1,1,1},{2,1,-1,-2},{1,-1,-1,1},{1,-2,2,-1}};
-	//BYTE H_inv[4][4]; 
 	BYTE* X0 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE* X1 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE* X2 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE* X3 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE** Xpart = (BYTE **)calloc(4,sizeof(BYTE*));
-	X[0] = X0;
-	X[1] = X1;
-	X[2] = X2;
-	X[3] = X3;
+	Xpart[0] = X0;
+	Xpart[1] = X1;
+	Xpart[2] = X2;
+	Xpart[3] = X3;
 	BYTE** Ypart;
 	int true_x, true_y;
 	for (y=0; y<ymax; y++){
@@ -125,6 +102,7 @@ BYTE** H_transform(int height, int width, BYTE** X){
 			Xpart[3][2] = X[true_y+3][true_x+2];
 			Xpart[3][3] = X[true_y+3][true_x+3];
 			
+			// show_mat(4, 4, Xpart);
 			Ypart = H_dotp_inv(H_dotp(Xpart));
 
 			X[true_y][true_x] = Ypart[0][0];
@@ -150,36 +128,6 @@ BYTE** H_transform(int height, int width, BYTE** X){
 	}
 	return X;
 }
-
-// BYTE** H_dotp(BYTE** M, BYTE** N){
-// 	BYTE Y0[4],Y1[4],Y2[4],Y3[4];
-// 	BYTE** Y;
-// 	Y[0] = Y0;
-// 	Y[1] = Y1;
-// 	Y[2] = Y2;
-// 	Y[3] = Y3;
-
-// 	Y[0][0] = M[0][0]*N[0][0] + M[0][1]*N[1][0] + M[0][2]*N[2][0] + M[0][3]*N[3][0];
-// 	Y[0][1] = M[0][0]*N[0][1] + M[0][1]*N[1][1] + M[0][2]*N[2][1] + M[0][3]*N[3][1];
-// 	Y[0][2] = M[0][0]*N[0][2] + M[0][1]*N[1][2] + M[0][2]*N[2][2] + M[0][3]*N[3][2];
-// 	Y[0][3] = M[0][0]*N[0][3] + M[0][1]*N[1][3] + M[0][2]*N[2][3] + M[0][3]*N[3][3];
-
-// 	Y[1][0] = M[1][0]*N[0][0] + M[1][1]*N[1][0] + M[1][2]*N[2][0] + M[1][3]*N[3][0];
-// 	Y[1][1] = M[1][0]*N[0][1] + M[1][1]*N[1][1] + M[1][2]*N[2][1] + M[1][3]*N[3][1];
-// 	Y[1][2] = M[1][0]*N[0][2] + M[1][1]*N[1][2] + M[1][2]*N[2][2] + M[1][3]*N[3][2];
-// 	Y[1][3] = M[1][0]*N[0][3] + M[1][1]*N[1][3] + M[1][2]*N[2][3] + M[1][3]*N[3][3];
-
-// 	Y[2][0] = M[2][0]*N[0][0] + M[2][1]*N[1][0] + M[2][2]*N[2][0] + M[2][3]*N[3][0];
-// 	Y[2][1] = M[2][0]*N[0][1] + M[2][1]*N[1][1] + M[2][2]*N[2][1] + M[2][3]*N[3][1];
-// 	Y[2][2] = M[2][0]*N[0][2] + M[2][1]*N[1][2] + M[2][2]*N[2][2] + M[2][3]*N[3][2];
-// 	Y[2][3] = M[2][0]*N[0][3] + M[2][1]*N[1][3] + M[2][2]*N[2][3] + M[2][3]*N[3][3];
-
-// 	Y[3][0] = M[3][0]*N[0][0] + M[3][1]*N[1][0] + M[3][2]*N[2][0] + M[3][3]*N[3][0];
-// 	Y[3][1] = M[3][0]*N[0][1] + M[3][1]*N[1][1] + M[3][2]*N[2][1] + M[3][3]*N[3][1];
-// 	Y[3][2] = M[3][0]*N[0][2] + M[3][1]*N[1][2] + M[3][2]*N[2][2] + M[3][3]*N[3][2];
-// 	Y[3][3] = M[3][0]*N[0][3] + M[3][1]*N[1][3] + M[3][2]*N[2][3] + M[3][3]*N[3][3];
-// 	return Y;
-// }
 
 BYTE** H_dotp(BYTE** N){
 	BYTE* Y0 = (BYTE *)calloc(4,sizeof(BYTE));
@@ -247,4 +195,14 @@ BYTE** H_dotp_inv(BYTE** N){
 	Y[2][3] = N[2][0] - 2*N[2][1] + 2*N[2][2] + N[2][3];
 	Y[3][3] = N[3][0] - 2*N[3][1] + 2*N[3][2] + N[3][3];
 	return Y;
+}
+
+void show_mat(int height, int width, BYTE** Mat){
+	int i,j;
+	for(i=0;i<height;i++){
+		for(j=0;j<width;j++){
+			printf("%d\t", Mat[i][j]);
+		}
+		printf("\n");
+	}
 }
