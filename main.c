@@ -8,30 +8,35 @@ typedef unsigned short WORD;
 
 const char iFileName[] = "data.yuv"; 
 const char oFileName[] = "result.yuv"; 
-const int width = 352;
-const int height = 288;
 
 BYTE** initMat(int width, int height, FILE *piFile); 
-BYTE** H_transform(BYTE** X);
+BYTE** H_transform(int height, int width, BYTE** X);
 BYTE** H_dotp(BYTE** N);
 BYTE** H_dotp_inv(BYTE** N);
 void saveMat(int height, int width, BYTE** Y, FILE *poFile);
 
 int main(void) {
 
+	const int width = 352;
+	const int height = 288;
+
 	FILE* piFile = fopen(iFileName, "rb");	//pointer input file
 	FILE* poFile = fopen(oFileName, "wb");	//pointer output file
 
-	BYTE **X = initMat(height, width, piFile);
+	int i;
+
+	for  (i = 0; i<height/4; i++){
+	BYTE **X = initMat(4, width, piFile);
 	// BYTE temp = H[0][0];
 	// printf("h00 = %d\n", H[287][351]);
 	// printf("h01 = %d\n", H[0][1]);
 	// printf("h02 = %d\n", H[0][2]);
 	// printf("h03 = %d\n", H[0][3]);
 
-	BYTE **Y = H_transform(X);
+	BYTE **Y = H_transform(4, width, X);
+	saveMat(4, width, Y, poFile);
+	}
 
-	saveMat(height, width, Y, poFile);
 
 	fclose(piFile);
     fclose(poFile);
@@ -80,12 +85,15 @@ void saveMat(int height, int width, BYTE** Y, FILE *poFile){
 	return;
 }
 
-BYTE** H_transform(BYTE** X){
+BYTE** H_transform(int height, int width, BYTE** X){
 	int y, ymax = height / 4;
 	int x, xmax = width / 4;
 	//BYTE H[4][4] = {{1,1,1,1},{2,1,-1,-2},{1,-1,-1,1},{1,-2,2,-1}};
 	//BYTE H_inv[4][4]; 
-	BYTE X0[4],X1[4],X2[4],X3[4];
+	BYTE* X0 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* X1 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* X2 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* X3 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE** Xpart = (BYTE **)calloc(4,sizeof(BYTE*));
 	X[0] = X0;
 	X[1] = X1;
@@ -174,7 +182,10 @@ BYTE** H_transform(BYTE** X){
 // }
 
 BYTE** H_dotp(BYTE** N){
-	BYTE Y0[4],Y1[4],Y2[4],Y3[4];
+	BYTE* Y0 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y1 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y2 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y3 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE** Y = (BYTE **)calloc(4,sizeof(BYTE*));
 	Y[0] = Y0;
 	Y[1] = Y1;
@@ -206,7 +217,10 @@ BYTE** H_dotp(BYTE** N){
 }
 
 BYTE** H_dotp_inv(BYTE** N){
-	BYTE Y0[4],Y1[4],Y2[4],Y3[4];
+	BYTE* Y0 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y1 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y2 = (BYTE *)calloc(4,sizeof(BYTE));
+	BYTE* Y3 = (BYTE *)calloc(4,sizeof(BYTE));
 	BYTE** Y = (BYTE **)calloc(4,sizeof(BYTE*));;
 	Y[0] = Y0;
 	Y[1] = Y1;
