@@ -4,17 +4,17 @@
 #include <stdio.h>
 
 typedef signed char BYTE;
-typedef unsigned short WORD;
+typedef signed short WORD;
 
 const char iFileName[] = "data.yuv"; 
 const char oFileName[] = "result.yuv"; 
 
 BYTE** initMat(int width, int height, FILE *piFile); 
-BYTE** H_transform(int height, int width, BYTE** X);
-BYTE** H_dotp(BYTE** N);
-BYTE** H_dotp_inv(BYTE** N);
-void saveMat(int height, int width, BYTE** Y, FILE *poFile);
-void show_mat(int height, int width, BYTE** Mat);
+WORD** H_transform(int height, int width, BYTE** X);
+WORD** H_dotp(BYTE** N);
+WORD** H_dotp_inv(WORD** N);
+void saveMat(int height, int width, WORD** Y, FILE *poFile);
+void show_mat(int height, int width, WORD** Mat);
 
 int main(void) {
 
@@ -27,7 +27,7 @@ int main(void) {
 	int i;
 	for  (i = 0; i<height/4; i++){
 	BYTE **X = initMat(4, width, piFile);
-	BYTE **Y = H_transform(4, width, X);
+	WORD **Y = H_transform(4, width, X);
 	saveMat(4, width, Y, poFile);
 	}
 
@@ -57,14 +57,14 @@ BYTE** initMat(int height,int width, FILE *piFile){
 	return MatResult;
 }
 
-void saveMat(int height, int width, BYTE** Y, FILE *poFile){
+void saveMat(int height, int width, WORD** Y, FILE *poFile){
 	int i;
 	for (i = 0; i < height; i++){
-		fwrite(Y[i], sizeof(BYTE), width, poFile);
+		fwrite(Y[i], sizeof(WORD), width, poFile);
 	}
 }
 
-BYTE** H_transform(int height, int width, BYTE** X){
+WORD** H_transform(int height, int width, BYTE** X){
 	int y, ymax = height / 4;
 	int x, xmax = width / 4;
 	BYTE* X0 = (BYTE *)calloc(4,sizeof(BYTE));
@@ -76,7 +76,13 @@ BYTE** H_transform(int height, int width, BYTE** X){
 	Xpart[1] = X1;
 	Xpart[2] = X2;
 	Xpart[3] = X3;
-	BYTE** Ypart;
+
+	WORD** Ypart;
+	WORD **Y = (WORD **)calloc(height,sizeof(WORD*));
+	for (y=0;y<height;y++){
+		Y[y] = (WORD *)calloc(width,sizeof(WORD));
+	}
+
 	int true_x, true_y;
 	for (y=0; y<ymax; y++){
 		for (x=0; x<xmax; x++){
@@ -103,37 +109,38 @@ BYTE** H_transform(int height, int width, BYTE** X){
 			Xpart[3][3] = X[true_y+3][true_x+3];
 			
 			Ypart = H_dotp_inv(H_dotp(Xpart));
+			// show_mat(4, 4, Ypart);
 
-			X[true_y][true_x] = Ypart[0][0];
-			X[true_y][true_x+1] = Ypart[0][1];
-			X[true_y][true_x+2] = Ypart[0][2];
-			X[true_y][true_x+3] = Ypart[0][3];
+			Y[true_y][true_x] = Ypart[0][0];
+			Y[true_y][true_x+1] = Ypart[0][1];
+			Y[true_y][true_x+2] = Ypart[0][2];
+			Y[true_y][true_x+3] = Ypart[0][3];
 
-			X[true_y+1][true_x] = Ypart[1][0];
-			X[true_y+1][true_x+1] = Ypart[1][1];
-			X[true_y+1][true_x+2] = Ypart[1][2];
-			X[true_y+1][true_x+3] = Ypart[1][3];
+			Y[true_y+1][true_x] = Ypart[1][0];
+			Y[true_y+1][true_x+1] = Ypart[1][1];
+			Y[true_y+1][true_x+2] = Ypart[1][2];
+			Y[true_y+1][true_x+3] = Ypart[1][3];
 
-			X[true_y+2][true_x] = Ypart[2][0];
-			X[true_y+2][true_x+1] = Ypart[2][1];
-			X[true_y+2][true_x+2] = Ypart[2][2];
-			X[true_y+2][true_x+3] = Ypart[2][3];
+			Y[true_y+2][true_x] = Ypart[2][0];
+			Y[true_y+2][true_x+1] = Ypart[2][1];
+			Y[true_y+2][true_x+2] = Ypart[2][2];
+			Y[true_y+2][true_x+3] = Ypart[2][3];
 
-			X[true_y+3][true_x] = Ypart[3][0];
-			X[true_y+3][true_x+1] = Ypart[3][1];
-			X[true_y+3][true_x+2] = Ypart[3][2];
-			X[true_y+3][true_x+3] = Ypart[3][3];
+			Y[true_y+3][true_x] = Ypart[3][0];
+			Y[true_y+3][true_x+1] = Ypart[3][1];
+			Y[true_y+3][true_x+2] = Ypart[3][2];
+			Y[true_y+3][true_x+3] = Ypart[3][3];
 		}
 	}
-	return X;
+	return Y;
 }
 
-BYTE** H_dotp(BYTE** N){
-	BYTE* Y0 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y1 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y2 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y3 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE** Y = (BYTE **)calloc(4,sizeof(BYTE*));
+WORD** H_dotp(BYTE** N){
+	WORD* Y0 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y1 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y2 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y3 = (WORD *)calloc(4,sizeof(WORD));
+	WORD** Y = (WORD **)calloc(4,sizeof(WORD*));
 	Y[0] = Y0;
 	Y[1] = Y1;
 	Y[2] = Y2;
@@ -154,19 +161,19 @@ BYTE** H_dotp(BYTE** N){
 	Y[2][2] = N[0][2] - N[1][2] - N[2][2] + N[3][2];
 	Y[2][3] = N[0][3] - N[1][3] - N[2][3] + N[3][3];
 
-	Y[3][0] = N[0][0] - 2*N[1][0] + 2*N[2][0] + N[3][0];
-	Y[3][1] = N[0][1] - 2*N[1][1] + 2*N[2][1] + N[3][1];
-	Y[3][2] = N[0][2] - 2*N[1][2] + 2*N[2][2] + N[3][2];
-	Y[3][3] = N[0][3] - 2*N[1][3] + 2*N[2][3] + N[3][3];
+	Y[3][0] = N[0][0] - 2*N[1][0] + 2*N[2][0] - N[3][0];
+	Y[3][1] = N[0][1] - 2*N[1][1] + 2*N[2][1] - N[3][1];
+	Y[3][2] = N[0][2] - 2*N[1][2] + 2*N[2][2] - N[3][2];
+	Y[3][3] = N[0][3] - 2*N[1][3] + 2*N[2][3] - N[3][3];
 	return Y;
 }
 
-BYTE** H_dotp_inv(BYTE** N){
-	BYTE* Y0 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y1 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y2 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE* Y3 = (BYTE *)calloc(4,sizeof(BYTE));
-	BYTE** Y = (BYTE **)calloc(4,sizeof(BYTE*));;
+WORD** H_dotp_inv(WORD** N){
+	WORD* Y0 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y1 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y2 = (WORD *)calloc(4,sizeof(WORD));
+	WORD* Y3 = (WORD *)calloc(4,sizeof(WORD));
+	WORD** Y = (WORD **)calloc(4,sizeof(WORD*));
 	Y[0] = Y0;
 	Y[1] = Y1;
 	Y[2] = Y2;
@@ -187,19 +194,19 @@ BYTE** H_dotp_inv(BYTE** N){
 	Y[2][2] = N[2][0] - N[2][1] - N[2][2] + N[2][3];
 	Y[3][2] = N[3][0] - N[3][1] - N[3][2] + N[3][3];
 
-	Y[0][3] = N[0][0] - 2*N[0][1] + 2*N[0][2] + N[0][3];
-	Y[1][3] = N[1][0] - 2*N[1][1] + 2*N[1][2] + N[1][3];
-	Y[2][3] = N[2][0] - 2*N[2][1] + 2*N[2][2] + N[2][3];
-	Y[3][3] = N[3][0] - 2*N[3][1] + 2*N[3][2] + N[3][3];
+	Y[0][3] = N[0][0] - 2*N[0][1] + 2*N[0][2] - N[0][3];
+	Y[1][3] = N[1][0] - 2*N[1][1] + 2*N[1][2] - N[1][3];
+	Y[2][3] = N[2][0] - 2*N[2][1] + 2*N[2][2] - N[2][3];
+	Y[3][3] = N[3][0] - 2*N[3][1] + 2*N[3][2] - N[3][3];
 	return Y;
 }
 
-// void show_mat(int height, int width, BYTE** Mat){
-// 	int i,j;
-// 	for(i=0;i<height;i++){
-// 		for(j=0;j<width;j++){
-// 			printf("%d\t", Mat[i][j]);
-// 		}
-// 		printf("\n");
-// 	}
-// }
+void show_mat(int height, int width, WORD** Mat){
+	int i,j;
+	for(i=0;i<height;i++){
+		for(j=0;j<width;j++){
+			printf("%d\t", Mat[i][j]);
+		}
+		printf("\n");
+	}
+}
