@@ -25,15 +25,16 @@ int main(void) {
 	FILE* poFile = fopen(oFileName, "wb");	//pointer output file
 
 	int i;
-
 	for  (i = 0; i<height/4; i++){
 	BYTE **X = initMat(4, width, piFile);
-	// show_mat(4, width, X);
 	BYTE **Y = H_transform(4, width, X);
 	saveMat(4, width, Y, poFile);
 	}
 
-
+	// BYTE **X = initMat(height, width, piFile);
+	// BYTE **Y = H_transform(height, width, X);
+	// saveMat(height, width, Y, poFile);
+	
 	fclose(piFile);
     fclose(poFile);
 	return 0;
@@ -61,7 +62,6 @@ void saveMat(int height, int width, BYTE** Y, FILE *poFile){
 	for (i = 0; i < height; i++){
 		fwrite(Y[i], sizeof(BYTE), width, poFile);
 	}
-	return;
 }
 
 BYTE** H_transform(int height, int width, BYTE** X){
@@ -102,7 +102,6 @@ BYTE** H_transform(int height, int width, BYTE** X){
 			Xpart[3][2] = X[true_y+3][true_x+2];
 			Xpart[3][3] = X[true_y+3][true_x+3];
 			
-			// show_mat(4, 4, Xpart);
 			Ypart = H_dotp_inv(H_dotp(Xpart));
 
 			X[true_y][true_x] = Ypart[0][0];
@@ -159,8 +158,6 @@ BYTE** H_dotp(BYTE** N){
 	Y[3][1] = N[0][1] - 2*N[1][1] + 2*N[2][1] + N[3][1];
 	Y[3][2] = N[0][2] - 2*N[1][2] + 2*N[2][2] + N[3][2];
 	Y[3][3] = N[0][3] - 2*N[1][3] + 2*N[2][3] + N[3][3];
-
-
 	return Y;
 }
 
@@ -197,12 +194,12 @@ BYTE** H_dotp_inv(BYTE** N){
 	return Y;
 }
 
-void show_mat(int height, int width, BYTE** Mat){
-	int i,j;
-	for(i=0;i<height;i++){
-		for(j=0;j<width;j++){
-			printf("%d\t", Mat[i][j]);
-		}
-		printf("\n");
-	}
-}
+// void show_mat(int height, int width, BYTE** Mat){
+// 	int i,j;
+// 	for(i=0;i<height;i++){
+// 		for(j=0;j<width;j++){
+// 			printf("%d\t", Mat[i][j]);
+// 		}
+// 		printf("\n");
+// 	}
+// }
