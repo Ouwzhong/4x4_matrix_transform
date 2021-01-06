@@ -2,6 +2,7 @@
  * main.c
  */
 #include <stdio.h>
+#include <time.h>
 
 typedef signed char BYTE;
 typedef signed short WORD;
@@ -23,14 +24,21 @@ int main(void) {
 
 	FILE* piFile = fopen(iFileName, "rb");	//pointer input file
 	FILE* poFile = fopen(oFileName, "wb");	//pointer output file
-
+	char buffer [80];
+	const time_t  start = time(0);
+	struct tm * timeinfo = localtime (&start);
+	strftime (buffer,80,"%c.",timeinfo);
+	printf("[main.c  %s] Start to read file.\n",buffer);
 	int i;
 	for  (i = 0; i<height/4; i++){
 	BYTE **X = initMat(4, width, piFile);
 	WORD **Y = H_transform(4, width, X);
 	saveMat(4, width, Y, poFile);
 	}
-
+	const time_t  t1 = time(0);
+	timeinfo = localtime (&t1);
+	strftime (buffer,80,"%c.",timeinfo);
+	printf("[main.c  %s] Done. time: %d\n",buffer,t1-start);
 	// BYTE **X = initMat(height, width, piFile);
 	// BYTE **Y = H_transform(height, width, X);
 	// saveMat(height, width, Y, poFile);
@@ -41,7 +49,6 @@ int main(void) {
 }
 
 BYTE** initMat(int height,int width, FILE *piFile){
-	// width = width/2;
 	BYTE **MatResult = (BYTE **)calloc(height,sizeof(BYTE*));
 	int i;
 	for (i = 0; i < height; i++){
